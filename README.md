@@ -1,0 +1,1 @@
+# hexagonal-ddd-node
