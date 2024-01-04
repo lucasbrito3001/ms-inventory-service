@@ -2,37 +2,36 @@ import {
 	StockBookDTO,
 	StockBookDTOSchema,
 } from "../controller/dto/StockBookDto";
-import { StockBookPort } from "./interfaces/StockBookPort";
+import { StockBookOutput, StockBookPort } from "./interfaces/StockBookPort";
 import { BookFileStoragePort } from "../repository/BookFileStorage";
 import { BookRepository } from "../repository/BookRepository";
 import { BookError } from "@/error/BookError";
 import { Book } from "@/domain/entities/Book";
+import { randomUUID } from "crypto";
+import { DependencyRegistry } from "@/infra/DependencyRegistry";
+import { Queue } from "@/infra/queue/Queue";
+import { BookStocked } from "@/domain/event/BookStocked";
 
 export class StockBook implements StockBookPort {
-	constructor(
-		private readonly bookRepository: BookRepository,
-		private readonly bookFileStorage: BookFileStoragePort,
-		private readonly idGenerator: () => `${string}-${string}-${string}-${string}-${string}`
-	) {}
+	private readonly bookRepository: BookRepository;
+	private readonly bookFileStorage: BookFileStoragePort;
+	private readonly queue: Queue;
+	private readonly idGenerator: () => string = randomUUID;
 
-	execute = async (stockBookDTO: StockBookDTO): Promise<Book | BookError> => {
-		const schemaValidation = StockBookDTOSchema.safeParse(stockBookDTO);
+	constructor(registry: DependencyRegistry) {
+		this.bookRepository = registry.inject("bookRepository");
+		this.bookFileStorage = registry.inject("bookCloudFileStorage");
+		this.queue = registry.inject("queue");
+	}
 
-		if (!schemaValidation.success)
-			return new BookError("INVALID_DTO", schemaValidation.error.issues);
-
-		const duplicatedBook = await this.bookRepository.getByTitleAndEdition(
-			schemaValidation.data.title,
-			schemaValidation.data.edition
-		);
-
-		if (duplicatedBook !== null) return new BookError("DUPLICATED_BOOK");
-
-		const book = Book.register(schemaValidation.data, this.idGenerator);
+	execute = async (stockBookDTO: StockBookDTO): Promise<StockBookOutput> => {
+		const book = Book.register(stockBookDTO, this.idGenerator);
 
 		await this.bookFileStorage.storeCover(book.cover);
 		await this.bookRepository.save(book);
 
-		return book;
+		this.queue.publish("bookStocked", new BookStocked(book.id, book.unitPrice));
+
+		return { bookId: book.id };
 	};
 }

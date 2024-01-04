@@ -1,15 +1,18 @@
 import express, { Express } from "express";
 import { DataSourceConnection } from "./DataSource";
 import { Server } from "http";
-import multer, { Multer } from "multer";
 import { CONFIG_ROUTERS } from "./router";
-import { Book } from "@/domain/entities/Book";
 import { ErrorsData, ErrorBase } from "@/error/ErrorBase";
 import { DependencyRegistry } from "./DependencyRegistry";
-import { OrderRepositoryDatabase } from "./repository/OrderDatabaseRepository";
-import { OrderEntity } from "./repository/entity/OrderEntity";
 import { BookRepositoryDatabase } from "./repository/BookDatabaseRepository";
-import { RegisterOrder } from "@/application/usecase/RegisterOrder";
+import { BookEntity } from "./repository/entity/BookEntity";
+import { StockBook } from "@/application/usecase/StockBook";
+import { RabbitMQAdapter } from "./queue/RabbitMQAdapter";
+import { QueueController } from "./queue/QueueController";
+import { CheckOrderItems } from "@/application/usecase/CheckOrderItems";
+import { BookCoverCloudFileStorage } from "./repository/BookCloudFileStorage";
+import { FileStorage } from "./FileStorage";
+import { GeneralLogger } from "./log/GeneralLogger";
 
 type WebServerErrorNames = "WEB_SERVER_CLOSED";
 
@@ -42,38 +45,57 @@ export class WebServer {
 
 		app.use(express.json());
 
-		const registry = this.fillRegistry();
+		const registry = await this.fillRegistry();
 		this.setRoutes(app, registry);
+		new QueueController(registry);
 
 		this.application = app.listen(process.env.PORT, () => {
 			console.log("Server started, listening on port " + process.env.PORT);
 		});
 	};
 
-	private fillRegistry() {
+	private async fillRegistry() {
+		const queue = new RabbitMQAdapter();
+		await queue.connect();
 		const registry = new DependencyRegistry();
 
 		const dependencies = [
-			{
-				name: "orderRepository",
-				value: new OrderRepositoryDatabase(
-					this.dataSourceConnection.getRepository(OrderEntity)
-				),
-			},
-			{
+			() => ({
+				name: "queue",
+				value: queue,
+			}),
+			() => ({
+				name: "logger",
+				value: new GeneralLogger(),
+			}),
+			() => ({
 				name: "bookRepository",
 				value: new BookRepositoryDatabase(
-					this.dataSourceConnection.getRepository(OrderEntity)
+					this.dataSourceConnection.getRepository(BookEntity)
 				),
-			},
-			{
-				name: "registerOrder",
-				value: new RegisterOrder(registry),
-			},
+			}),
+			() => ({
+				name: "bookCoverBucket",
+				value: new FileStorage(
+					JSON.parse(process.env.SVC_ACC_GCP_BUCKET as string)
+				).bucket("book-covers-stock"),
+			}),
+			() => ({
+				name: "bookCloudFileStorage",
+				value: new BookCoverCloudFileStorage(registry),
+			}),
+			() => ({
+				name: "checkOrderItems",
+				value: new CheckOrderItems(registry),
+			}),
+			() => ({
+				name: "stockBook",
+				value: new StockBook(registry),
+			}),
 		];
 
 		dependencies.forEach((dependency) =>
-			registry.push(dependency.name, dependency.value)
+			registry.push(dependency().name, dependency().value)
 		);
 
 		return registry;

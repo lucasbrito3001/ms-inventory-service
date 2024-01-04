@@ -1,4 +1,5 @@
 import { Storage, UploadOptions, UploadResponse } from "@google-cloud/storage";
+import { createReadStream } from "fs";
 
 export type FileStorageCredentials = {
 	type: string;
@@ -17,10 +18,8 @@ export type FileStorageCredentials = {
 export type FileStorageBucketOptions = UploadOptions;
 
 export type FileStorageBucket = {
-	upload(
-		path: string,
-		options: FileStorageBucketOptions
-	): Promise<UploadResponse>;
+	upload(filename: string, path: string): Promise<void>;
+	// file(filename: string): File;
 };
 
 export class FileStorage {
@@ -33,9 +32,20 @@ export class FileStorage {
 	bucket = (bucketName: string): FileStorageBucket => {
 		const storageBucket = this.storage.bucket(bucketName);
 
+		const upload = async (filename: string, path: string) => {
+			try {
+				const file = storageBucket.file(filename);
+				const stream = createReadStream(path);
+
+				await stream.pipe(file.createWriteStream());
+			} catch (error) {
+				const anyError = error as any;
+				throw new Error(`Error uploading file to bucket: ${anyError.message}`);
+			}
+		};
+
 		return {
-			upload: (path: string, options: FileStorageBucketOptions) =>
-				storageBucket.upload(path, options),
+			upload,
 		};
 	};
 }

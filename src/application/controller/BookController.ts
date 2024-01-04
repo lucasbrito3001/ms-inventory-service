@@ -5,12 +5,15 @@ import { Request, Response } from "express";
 import { GetStockedBooksPort } from "../usecase/interfaces/GetStockedBooksPort";
 import { UnexpectedError } from "@/error/ErrorBase";
 import { DependencyRegistry } from "@/infra/DependencyRegistry";
+import { Logger } from "@/infra/log/Logger";
 
 export class BookController {
+	private readonly logger: Logger;
 	private readonly stockBook: StockBookPort;
 	private readonly getStockedBooks: GetStockedBooksPort;
 
 	constructor(readonly registry: DependencyRegistry) {
+		this.logger = registry.inject("logger");
 		this.stockBook = registry.inject("stockBook");
 		this.getStockedBooks = registry.inject("getStockedBooks");
 	}
@@ -27,7 +30,7 @@ export class BookController {
 
 			return res.status(201).json(bookOrError);
 		} catch (error) {
-			console.log(error);
+			this.logger.error(error);
 
 			const { httpCode, ...unexpectedErrorMessage } = new UnexpectedError();
 			return res.status(httpCode).json(unexpectedErrorMessage);

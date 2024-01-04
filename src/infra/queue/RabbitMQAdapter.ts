@@ -1,7 +1,7 @@
 import amqp from "amqplib";
 import { Queue } from "./Queue";
 
-export class RabbitMQ implements Queue {
+export class RabbitMQAdapter implements Queue {
 	connection: amqp.Connection | undefined;
 
 	async connect(): Promise<void> {
@@ -13,7 +13,10 @@ export class RabbitMQ implements Queue {
 
 		const channel = await this.connection.createChannel();
 		await channel.assertQueue(queueName, { durable: true });
-		channel.consume(queueName, async (msg: any) => console.log(msg));
+		channel.consume(queueName, async (msg: any) => {
+			await callback(JSON.parse(msg.content.toString()));
+			channel.ack(msg);
+		});
 	}
 
 	async publish(queueName: string, data: any): Promise<void> {

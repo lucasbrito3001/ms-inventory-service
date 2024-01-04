@@ -8,6 +8,7 @@ export const StockBookDTOSchema = z.object({
 	cover: z.string(),
 	quantity: z.coerce.number().nonnegative(),
 	isVisible: z.coerce.boolean().optional(),
+	unitPrice: z.coerce.number().nonnegative(),
 });
 
 export type StockBookDTO = z.infer<typeof StockBookDTOSchema>;

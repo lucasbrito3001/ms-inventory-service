@@ -45,7 +45,7 @@ export class DataSourceConnection {
 			database: process.env.DS_DATABASE || "",
 			entities: [BookEntity],
 			synchronize: process.env.NODE_ENV !== "prd",
-			logging: process.env.NODE_ENV !== "prd",
+			// logging: process.env.NODE_ENV !== "prd",
 		};
 
 		if (Object.values(options).some((opt) => !opt)) return undefined;

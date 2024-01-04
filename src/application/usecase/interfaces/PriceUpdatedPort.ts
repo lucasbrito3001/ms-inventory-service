@@ -1,7 +1,7 @@
 import { StockBookDTO } from "@/application/controller/dto/StockBookDto";
 
-export interface StockBookPort {
-	execute(stockBookDTO: StockBookDTO): Promise<StockBookOutput>;
+export interface PriceUpdatedPort {
+	execute(updatedBookDTO: StockBookDTO): Promise<StockBookOutput>;
 }
 
 export type StockBookOutput = {

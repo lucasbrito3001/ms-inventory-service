@@ -10,12 +10,13 @@ export class Book {
 		public release: string,
 		public cover: string,
 		public quantity: number,
-		public isVisible: boolean
+		public isVisible: boolean,
+		public unitPrice: number
 	) {}
 
 	static register = (
 		bookDTO: StockBookDTO,
-		idGenerator: () => `${string}-${string}-${string}-${string}-${string}` = randomUUID
+		idGenerator: () => string = randomUUID
 	): Book => {
 		const id = idGenerator();
 
@@ -27,7 +28,8 @@ export class Book {
 			bookDTO.release,
 			this.coverFilename(bookDTO.title, bookDTO.edition, "jpg"),
 			bookDTO.quantity,
-			bookDTO.isVisible || false
+			!!bookDTO.isVisible || false,
+			bookDTO.unitPrice
 		);
 
 		return book;

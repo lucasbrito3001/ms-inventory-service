@@ -1,3 +1,3 @@
 export interface BookFileStoragePort {
-	storeCover(filename: string): Promise<string>;
+	storeCover(filename: string): Promise<void>;
 }

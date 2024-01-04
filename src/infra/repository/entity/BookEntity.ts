@@ -1,6 +1,7 @@
-import { Column, Entity, PrimaryColumn } from "typeorm";
+import { Column, Entity, PrimaryColumn, Unique } from "typeorm";
 
 @Entity("book")
+@Unique("uk_title_edition_constraint", ["title", "edition"])
 export class BookEntity {
 	@PrimaryColumn("uuid")
 	id?: string;
@@ -18,4 +19,6 @@ export class BookEntity {
 	quantity?: number;
 	@Column({ type: "bool" })
 	isVisible?: boolean;
+	@Column({ type: "int" })
+	unitPrice?: number;
 }

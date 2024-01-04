@@ -1,19 +1,19 @@
 import { BookFileStoragePort } from "../../application/repository/BookFileStorage";
+import { DependencyRegistry } from "../DependencyRegistry";
 import { FileStorageBucket, FileStorageBucketOptions } from "../FileStorage";
 
 export class BookCoverCloudFileStorage implements BookFileStoragePort {
-	constructor(private readonly bookCoverBucket: FileStorageBucket) {}
+	private readonly bookCoverBucket: FileStorageBucket;
 
-	storeCover = async (filename: string): Promise<string> => {
+	constructor(readonly registry: DependencyRegistry) {
+		this.bookCoverBucket = registry.inject("bookCoverBucket");
+	}
+
+	storeCover = async (filename: string): Promise<void> => {
 		const uploadOptions: FileStorageBucketOptions = {
 			destination: filename,
 		};
 
-		const [file] = await this.bookCoverBucket.upload(
-			`/tmp/uploads/${filename}`,
-			uploadOptions
-		);
-
-		return file.baseUrl || "";
+		await this.bookCoverBucket.upload(filename, `/tmp/uploads/${filename}`);
 	};
 }

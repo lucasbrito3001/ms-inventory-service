@@ -23,7 +23,8 @@ export class GetStockedBooks implements GetStockedBooksPort {
 					book.release as string,
 					book.cover as string,
 					book.quantity as number,
-					book.isVisible as boolean
+					book.isVisible as boolean,
+					book.unitPrice as number
 				)
 		);
 
