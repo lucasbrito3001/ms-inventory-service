@@ -1,11 +1,8 @@
-import {
-	StockBookDTO,
-	StockBookDTOSchema,
-} from "../controller/dto/StockBookDto";
+import { StockBookDTO } from "../controller/dto/StockBookDto";
 import { StockBookOutput, StockBookPort } from "./interfaces/StockBookPort";
 import { BookFileStoragePort } from "../repository/BookFileStorage";
 import { BookRepository } from "../repository/BookRepository";
-import { BookError } from "@/error/BookError";
+import { DuplicatedBookError } from "@/error/BookError";
 import { Book } from "@/domain/entities/Book";
 import { randomUUID } from "crypto";
 import { DependencyRegistry } from "@/infra/DependencyRegistry";
@@ -20,12 +17,21 @@ export class StockBook implements StockBookPort {
 
 	constructor(registry: DependencyRegistry) {
 		this.bookRepository = registry.inject("bookRepository");
-		this.bookFileStorage = registry.inject("bookCloudFileStorage");
+		this.bookFileStorage = registry.inject("bookFileStorage");
 		this.queue = registry.inject("queue");
 	}
 
-	execute = async (stockBookDTO: StockBookDTO): Promise<StockBookOutput> => {
-		const book = Book.register(stockBookDTO, this.idGenerator);
+	execute = async (input: StockBookDTO): Promise<StockBookOutput> => {
+		const bookOrNull = await this.bookRepository.getByTitleAndEdition(
+			input.title,
+			input.edition
+		);
+
+		if (bookOrNull !== null) {
+			throw new DuplicatedBookError();
+		}
+
+		const book = Book.create(input, this.idGenerator);
 
 		await this.bookFileStorage.storeCover(book.cover);
 		await this.bookRepository.save(book);

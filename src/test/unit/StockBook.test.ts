@@ -1,63 +1,50 @@
-import { beforeEach, describe, expect, test } from "vitest";
+import { beforeAll, beforeEach, describe, expect, test } from "vitest";
 import { StockBook } from "../../application/usecase/StockBook";
-import { GetStockedBooks } from "../../application/usecase/GetStockedBooks";
+import { SearchBooks } from "../../application/usecase/SearchBooks";
 import { BookMemoryRepository } from "../../infra/repository/mock/BookMemoryRepository";
 import { Book } from "../../domain/entities/Book";
 import { INPUT_BOOK } from "../constants";
-import { StockBookDTO } from "../../application/controller/dto/StockBookDto";
-import { BookError } from "../../error/BookError";
+import { DuplicatedBookError } from "../../error/BookError";
 import { BookLocalFileStorage } from "../../infra/repository/mock/BookLocalFileStorage";
+import { DependencyRegistry } from "@/infra/DependencyRegistry";
+import { MockQueue } from "@/infra/queue/mock/MockQueue";
+import { BookRepository } from "@/application/repository/BookRepository";
 
-describe("StockBook", () => {
-	let stockBookUseCase: StockBook;
-	let getStockBook: GetStockedBooks;
-	let bookMemoryRepository: BookMemoryRepository;
+describe("[Use Case - StockBook]", () => {
+	let stockBook: StockBook;
+
+	let bookRepository: BookRepository;
+
+	let queue: MockQueue;
+	const registry: DependencyRegistry = new DependencyRegistry();
+
+	beforeAll(() => {
+		queue = new MockQueue();
+		bookRepository = new BookMemoryRepository();
+
+		registry
+			.push("queue", queue)
+			.push("bookRepository", bookRepository)
+			.push("bookFileStorage", new BookLocalFileStorage())
+			.push("stockBook", new StockBook(registry));
+	});
 
 	beforeEach(() => {
-		bookMemoryRepository = new BookMemoryRepository();
-		const bookLocalFileStorage = new BookLocalFileStorage();
-
-		stockBookUseCase = new StockBook(
-			bookMemoryRepository,
-			bookLocalFileStorage,
-			() => `0-0-0-0-0`
-		);
-
-		getStockBook = new GetStockedBooks(bookMemoryRepository);
+		stockBook = new StockBook(registry);
 	});
 
 	test("should stock a new book successfully", async () => {
-		const book = await stockBookUseCase.execute(INPUT_BOOK);
-		const stockedBooks = await getStockBook.execute("Domain-Driven Design");
+		const output = await stockBook.execute(INPUT_BOOK);
 
-		expect(book instanceof Book).toBeTruthy();
+		expect(output.bookId).toBeDefined();
+		expect(queue.length).toBe(1);
 	});
 
-	test("should return INVALID_DTO error", async () => {
-		const { title, ...INVALID_BOOK_DTO } = INPUT_BOOK;
+	test("should throw DuplicatedBookError", async () => {
+		await bookRepository.save(Book.create(INPUT_BOOK));
 
-		const bookOrError = await stockBookUseCase.execute(
-			INVALID_BOOK_DTO as StockBookDTO
-		);
+		const fn = () => stockBook.execute(INPUT_BOOK);
 
-		expect(bookOrError).toStrictEqual(
-			new BookError("INVALID_DTO", [
-				{
-					code: "invalid_type",
-					expected: "string",
-					message: "Required",
-					path: ["title"],
-					received: "undefined",
-				},
-			])
-		);
-	});
-
-	test("should return DUPLICATED_BOOK error", async () => {
-		await bookMemoryRepository.save(INPUT_BOOK);
-
-		const bookOrError = await stockBookUseCase.execute(INPUT_BOOK);
-
-		expect(bookOrError).toStrictEqual(new BookError("DUPLICATED_BOOK"));
+		expect(fn).rejects.toBeInstanceOf(DuplicatedBookError);
 	});
 });

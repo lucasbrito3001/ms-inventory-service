@@ -1,15 +1,17 @@
 import { Queue } from "./Queue";
 import { DependencyRegistry } from "../DependencyRegistry";
-import { OrderRegistered } from "@/domain/event/OrderRegistered";
-import { CheckOrderItems } from "@/application/usecase/CheckOrderItems";
+import { QueueSubscriber } from "./subscribers/QueueSubscriber";
 
 export class QueueController {
-	constructor(readonly registry: DependencyRegistry) {
-		const queue = registry.inject("queue");
-		const checkOrderItems: CheckOrderItems = registry.inject("checkOrderItems");
+	private readonly queue: Queue;
 
-		queue.subscribe("orderRegistered", async (message: OrderRegistered) => {
-			await checkOrderItems.execute(message);
+	constructor(readonly registry: DependencyRegistry) {
+		this.queue = registry.inject("queue");
+	}
+
+	public appendSubscribers(subscribers: QueueSubscriber[]) {
+		subscribers.forEach((subscriber) => {
+			this.queue.subscribe(subscriber);
 		});
 	}
 }

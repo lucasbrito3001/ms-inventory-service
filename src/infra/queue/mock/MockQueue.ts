@@ -1,17 +1,22 @@
 import { Queue } from "../Queue";
+import { QueueSubscriber } from "../subscribers/QueueSubscriber";
 
 export class MockQueue implements Queue {
-	queue: any[] = [];
+	private queue: any[] = [];
+
+	get length(): number {
+		return this.queue.length;
+	}
 
 	async connect(): Promise<void> {
 		console.log("connected");
 	}
 
-	async subscribe(queueName: string, callback: Function): Promise<void> {
+	async subscribe(_: any): Promise<void> {
 		this.queue.shift();
 	}
 
-	async publish(queueName: string, data: any): Promise<void> {
+	async publish(_: string, data: any): Promise<void> {
 		this.queue.push(data);
 	}
 }

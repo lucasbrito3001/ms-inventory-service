@@ -5,13 +5,19 @@ import { Book } from "../../../domain/entities/Book";
 export class BookMemoryRepository implements BookRepository {
 	private books: Book[] = [];
 
-	async save(stockBookDTO: StockBookDTO): Promise<void> {
-		const book = Book.register(stockBookDTO, () => "0-0-0-0-0");
+	async batchUpdate(books: Book[]): Promise<void> {
+		this.books = this.books.map((book, id) => {
+			const upBook = books.find((upBook) => upBook.id === book.id);
+			return upBook ? upBook : book;
+		});
+	}
+
+	async save(book: Book): Promise<void> {
 		this.books.push(book);
 	}
 
 	async update(id: string, stockBookDTO: StockBookDTO): Promise<void> {
-		const book = Book.register(stockBookDTO, () => "0-0-0-0-0");
+		const book = Book.create(stockBookDTO, () => "0-0-0-0-0");
 		const index = this.books.findIndex((stock) => stock.id === id);
 		this.books[index] = book;
 	}
