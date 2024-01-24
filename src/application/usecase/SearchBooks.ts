@@ -17,7 +17,7 @@ export class SearchBooks implements SearchBooksPort {
 		const books = await this.bookRepository.search(title);
 
 		if (books.length === 0) throw new BookNotFoundError();
-		
+
 		return books;
 	};
 }

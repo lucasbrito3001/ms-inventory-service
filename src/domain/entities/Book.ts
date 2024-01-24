@@ -32,7 +32,7 @@ export class Book extends DomainBase {
 			this.coverFilename(bookDTO.title, bookDTO.edition, "jpg"),
 			bookDTO.quantity,
 			!!bookDTO.isVisible || false,
-			this.formatMoneyToPersist(bookDTO.unitPrice)
+			this.formatMoneyToPersist(+bookDTO.unitPrice)
 		);
 
 		return book;

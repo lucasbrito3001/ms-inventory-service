@@ -19,6 +19,6 @@ export class BookEntity {
 	quantity?: number;
 	@Column({ type: "bool" })
 	isVisible?: boolean;
-	@Column({ type: "int" })
+	@Column({ type: "decimal", precision: 6, scale: 2 })
 	unitPrice?: number;
 }

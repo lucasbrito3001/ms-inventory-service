@@ -1,5 +1,4 @@
 import { In, Like, Repository } from "typeorm";
-import { StockBookDTO } from "../../application/controller/dto/StockBookDto";
 import { BookEntity } from "./entity/BookEntity";
 import { BookRepository } from "@/application/repository/BookRepository";
 import { Book } from "@/domain/entities/Book";

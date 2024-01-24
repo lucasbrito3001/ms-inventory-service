@@ -16,10 +16,17 @@ export class UncaughtExceptionHandler {
 			this.logger.handledError(error.name, error.message);
 
 			const { httpCode, cause, ...errorBase } = error;
-			this.response.status(httpCode).json({
+			return this.response.status(httpCode).json({
 				...errorBase,
 				...(process.env.NODE_ENV !== "production" && { cause }),
 			});
 		}
+
+		this.logger.handledError("UNHANDLED_ERROR", error);
+		return this.response
+			.status(500)
+			.json({
+				error: "Internal server error, please contact the administrator",
+			});
 	};
 }

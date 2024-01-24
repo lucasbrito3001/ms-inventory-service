@@ -17,8 +17,7 @@ export class UpdatePrice implements UpdatePricePort {
 
 	async execute(id: string, unitPrice: number): Promise<void> {
 		const book = await this.bookRepository.get(id);
-
-		console.log(book);
+		
 		if (!book) throw new BookNotFoundError();
 
 		const bookUpdated = Book.updatePrice(book, unitPrice);

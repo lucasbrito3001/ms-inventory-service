@@ -62,8 +62,8 @@ export class WebServer {
 
 		// Exception handler middleware
 		this.app.use(
-			(err: Error, req: Request, res: Response, next: NextFunction): void => {
-				return new UncaughtExceptionHandler(res, logger).handle(err);
+			(err: Error, _1: Request, res: Response, _2: NextFunction): void => {
+				new UncaughtExceptionHandler(res, logger).handle(err);
 			}
 		);
 
