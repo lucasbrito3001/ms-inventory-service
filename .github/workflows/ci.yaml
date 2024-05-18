@@ -47,7 +47,7 @@ jobs:
 
       - name: Get service name
         run: |
-          SERVICE_NAME=$(echo ${{ github.repository }} | cut -c 15-)
+          SERVICE_NAME=$(echo ${{ github.repository }} | cut -c 16-)
 
           echo "SERVICE_NAME=$SERVICE_NAME" >> $GITHUB_ENV
 
