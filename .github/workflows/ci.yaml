@@ -64,4 +64,4 @@ jobs:
           instance_name: "services-instance"
           zone: "us-east1-b"
           ssh_private_key: "${{ secrets.SSH_PRIVATE_KEY }}"
-          command: "docker stop ${{ env.SERVICE_NAME }} || true && docker rm ${{ env.SERVICE_NAME }} || true && docker run -d -p 3000:3000 --name ${{ env.SERVICE_NAME }} --network infra-tools-library_mynetwork --env-file /var/env/${{ env.SERVICE_NAME }}.env ${{  github.repository }}:${{ github.sha }}"
+          command: "docker stop ${{ env.SERVICE_NAME }} || true && docker rm ${{ env.SERVICE_NAME }} || true && docker run -d --name ${{ env.SERVICE_NAME }} --network infra-tools-library_mynetwork --env-file /var/env/${{ env.SERVICE_NAME }}.env ${{  github.repository }}:${{ github.sha }}"
