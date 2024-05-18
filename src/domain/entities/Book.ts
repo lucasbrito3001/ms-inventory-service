@@ -3,13 +3,14 @@ import { randomUUID } from "crypto";
 import { DomainBase } from "../Base";
 
 export class Book extends DomainBase {
-	constructor(
+	private constructor(
 		public id: string,
 		public title: string,
 		public edition: number,
 		public author: string,
 		public release: string,
 		public cover: string,
+		public category: string,
 		public quantity: number,
 		public isVisible: boolean,
 		public unitPrice: number
@@ -30,12 +31,39 @@ export class Book extends DomainBase {
 			bookDTO.author,
 			bookDTO.release,
 			this.coverFilename(bookDTO.title, bookDTO.edition, "jpg"),
+			bookDTO.category,
 			bookDTO.quantity,
 			!!bookDTO.isVisible || false,
 			this.formatMoneyToPersist(+bookDTO.unitPrice)
 		);
 
 		return book;
+	};
+
+	static instance = (
+		id: string,
+		title: string,
+		edition: number,
+		author: string,
+		release: string,
+		cover: string,
+		category: string,
+		quantity: number,
+		isVisible: boolean,
+		unitPrice: number
+	): Book => {
+		return new Book(
+			id,
+			title,
+			edition,
+			author,
+			release,
+			cover,
+			category,
+			quantity,
+			isVisible,
+			unitPrice
+		);
 	};
 
 	static updatePrice = (book: Book, newUnitPrice: number): Book => {
@@ -46,6 +74,7 @@ export class Book extends DomainBase {
 			book.author,
 			book.release,
 			book.cover,
+			book.category,
 			book.quantity,
 			book.isVisible,
 			this.formatMoneyToPersist(newUnitPrice)

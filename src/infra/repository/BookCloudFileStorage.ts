@@ -5,8 +5,8 @@ import { FileStorageBucket, FileStorageBucketOptions } from "../FileStorage";
 export class BookCoverCloudFileStorage implements BookFileStoragePort {
 	private readonly bookCoverBucket: FileStorageBucket;
 
-	constructor(readonly registry: DependencyRegistry) {
-		this.bookCoverBucket = registry.inject("bookCoverBucket");
+	constructor(bucket: FileStorageBucket) {
+		this.bookCoverBucket = bucket;
 	}
 
 	storeCover = async (filename: string): Promise<void> => {

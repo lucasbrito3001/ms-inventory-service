@@ -1,4 +1,4 @@
-import { Storage, UploadOptions, UploadResponse } from "@google-cloud/storage";
+import { Storage, UploadOptions } from "@google-cloud/storage";
 import { createReadStream } from "fs";
 
 export type FileStorageCredentials = {

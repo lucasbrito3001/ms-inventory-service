@@ -1,5 +1,5 @@
-import { OrderRegistered } from "@/domain/event/OrderRegistered";
+import { OrderRegisteredMessage } from "@/domain/event/OrderRegistered";
 
 export interface CheckOrderItemsPort {
-	execute(order: OrderRegistered): Promise<void>;
+	execute(order: OrderRegisteredMessage): Promise<void>;
 }

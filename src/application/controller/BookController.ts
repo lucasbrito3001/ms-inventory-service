@@ -1,7 +1,6 @@
 import { StockBookPort } from "../usecase/interfaces/StockBookPort";
 import { StockBookDTO, StockBookDTOSchema } from "./dto/StockBookDto";
 import {
-	BookError,
 	InvalidBookInputError,
 	InvalidTitleError,
 } from "../../error/BookError";
@@ -11,18 +10,22 @@ import { DependencyRegistry } from "@/infra/DependencyRegistry";
 import { Logger } from "@/infra/log/Logger";
 import { UpdatePriceDTO, UpdatePriceDTOSchema } from "./dto/UpdatePriceDto";
 import { UpdatePricePort } from "../usecase/interfaces/UpdatePricePort";
+import { GetBookInformationsPort } from "../usecase/GetBookInformations";
+import { InvalidUUIDError } from "@/error/InfraError";
 
 export class BookController {
 	private readonly logger: Logger;
 	private readonly _stockBook: StockBookPort;
 	private readonly _searchBooks: SearchBooksPort;
 	private readonly _updatePrice: UpdatePricePort;
+	private readonly _getBookInformations: GetBookInformationsPort;
 
 	constructor(readonly registry: DependencyRegistry) {
 		this.logger = registry.inject("logger");
 		this._stockBook = registry.inject("stockBook");
 		this._searchBooks = registry.inject("searchBooks");
 		this._updatePrice = registry.inject("updatePrice");
+		this._getBookInformations = registry.inject("getBookInformations");
 	}
 
 	stock = async (
@@ -96,6 +99,26 @@ export class BookController {
 			if (!title) throw new InvalidTitleError();
 
 			const books = await this._searchBooks.execute(title as string);
+
+			return res.status(200).json(books);
+		} catch (error) {
+			next(error);
+		}
+	};
+
+	getBookInformations = async (
+		req: Request,
+		res: Response,
+		next: NextFunction
+	): Promise<any> => {
+		try {
+			const { id } = req.params;
+
+			this.logger.logUseCase("GetBookInformations", `Id: ${id}`);
+
+			if(id.length !== 36) throw new InvalidUUIDError()
+
+			const books = await this._getBookInformations.execute(id);
 
 			return res.status(200).json(books);
 		} catch (error) {

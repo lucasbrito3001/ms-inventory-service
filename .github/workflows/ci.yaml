@@ -1,0 +1,67 @@
+name: pipeline_ci
+run-name: Pipeline CI - v1.0
+
+on:
+  pull_request:
+    branches:
+      - dev
+
+jobs:
+  run-unit-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout env
+        uses: actions/checkout@v4
+
+      - name: Setup node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run tests
+        run: npm run test
+
+  build-push-docker-image:
+    runs-on: ubuntu-latest
+    environment: dev
+    steps:
+      - name: Checkout env
+        uses: actions/checkout@v4
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_PASSWORD }}
+
+      - name: Build and push
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./Dockerfile
+          push: true
+          tags: ${{  github.repository }}:latest, ${{  github.repository }}:${{ github.sha }}
+
+      - name: Get service name
+        run: |
+          SERVICE_NAME=$(echo ${{ github.repository }} | cut -c 15-)
+
+          echo "SERVICE_NAME=$SERVICE_NAME" >> $GITHUB_ENV
+
+      - name: Auth to GCP
+        id: "auth"
+        uses: "google-github-actions/auth@v2"
+        with:
+          credentials_json: ${{ secrets.GCP_CREDENTIALS_JSON }}
+
+      - name: SSH to GCE
+        id: "compute-ssh"
+        uses: "google-github-actions/ssh-compute@v1"
+        with:
+          instance_name: "services-instance"
+          zone: "us-east1-b"
+          ssh_private_key: "${{ secrets.SSH_PRIVATE_KEY }}"
+          command: "docker stop ${{ env.SERVICE_NAME }} || true && docker rm ${{ env.SERVICE_NAME }} || true && docker run -d -p 3000:3000 --name ${{ env.SERVICE_NAME }} --network infra-tools-library_mynetwork --env-file /var/env/${{ env.SERVICE_NAME }}.env ${{  github.repository }}:${{ github.sha }}"

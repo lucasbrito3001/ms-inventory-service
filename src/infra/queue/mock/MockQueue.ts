@@ -1,5 +1,5 @@
 import { Queue } from "../Queue";
-import { QueueSubscriber } from "../subscribers/QueueSubscriber";
+import { QueueSubscriber } from "../subscriber/QueueSubscriber";
 
 export class MockQueue implements Queue {
 	private queue: any[] = [];

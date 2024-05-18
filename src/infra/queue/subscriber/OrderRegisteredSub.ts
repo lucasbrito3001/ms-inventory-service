@@ -2,7 +2,7 @@ import { DependencyRegistry } from "@/infra/DependencyRegistry";
 import { QueueSubscriber } from "./QueueSubscriber";
 import { Logger } from "@/infra/log/Logger";
 import { CheckOrderItemsPort } from "@/application/usecase/interfaces/CheckOrderItemsPort";
-import { OrderRegistered } from "@/domain/event/OrderRegistered";
+import { OrderRegisteredMessage } from "@/domain/event/OrderRegistered";
 
 export class OrderRegisteredSub implements QueueSubscriber {
 	public queueName = "orderRegistered";
@@ -14,15 +14,15 @@ export class OrderRegisteredSub implements QueueSubscriber {
 		this.logger = registry.inject("logger");
 	}
 
-	private logMessage = (bookId: string): void => {
+	private logMessage = (orderId: string): void => {
 		this.logger.logEvent(
-			"BookStocked",
-			`Adding book ${bookId} to the database`
+			"OrderRegistered",
+			`Checking order items stock: ${orderId}`
 		);
 	};
 
-	public callbackFunction = async (message: OrderRegistered) => {
-		this.logMessage(message.id);
-		this.useCase.execute(message);
+	public callbackFunction = async (message: OrderRegisteredMessage) => {
+		this.logMessage(message.orderId);
+		await this.useCase.execute(message);
 	};
 }

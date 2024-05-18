@@ -6,13 +6,13 @@ export type ErrorsData<T extends string> = {
 	};
 };
 
-export class ErrorBase<T extends string> implements Error {
-	name: T;
+export class ErrorBase implements Error {
+	name: string;
 	message: string;
 	httpCode: number;
 	cause?: any;
 
-	constructor(name: T, message: string, httpCode: number, cause?: any) {
+	constructor(name: string, message: string, httpCode: number, cause?: any) {
 		this.name = name;
 		this.message = message;
 		this.httpCode = httpCode;
@@ -20,7 +20,7 @@ export class ErrorBase<T extends string> implements Error {
 	}
 }
 
-export class UnexpectedError extends ErrorBase<"UNEXPECTED_ERROR"> {
+export class UnexpectedError extends ErrorBase {
 	constructor() {
 		super("UNEXPECTED_ERROR", "An unexpected error occurred.", 500);
 	}

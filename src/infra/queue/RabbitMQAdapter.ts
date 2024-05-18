@@ -1,8 +1,8 @@
 import amqp from "amqplib";
 import { Queue } from "./Queue";
-import { DependencyRegistry } from "../DependencyRegistry";
 import { Logger } from "../log/Logger";
-import { QueueSubscriber } from "./subscribers/QueueSubscriber";
+import { QueueSubscriber } from "./subscriber/QueueSubscriber";
+import { Event } from "@/domain/Base";
 
 export class RabbitMQAdapter implements Queue {
 	connection: amqp.Connection | undefined;
@@ -10,9 +10,23 @@ export class RabbitMQAdapter implements Queue {
 	constructor(private readonly logger: Logger) {}
 
 	async connect(): Promise<void> {
-		this.connection = await amqp.connect(
-			process.env.AMQP_STRING_CONNECTION as string
-		);
+		const connectionStringsByEnv = {
+			e2e: process.env.AMQP_E2E_CONNECTION_STRING as string,
+			dev: process.env.AMQP_DEV_CONNECTION_STRING as string,
+		};
+
+		try {
+			this.logger.log("[RABBITMQ] Connecting to RabbitMQ...");
+			this.connection = await amqp.connect(
+				connectionStringsByEnv[
+					process.env.NODE_ENV as keyof typeof connectionStringsByEnv
+				]
+			);
+			this.logger.log("[RABBITMQ] Connected succesfully!");
+		} catch (error) {
+			const anyError = error as any;
+			throw new Error(anyError.message);
+		}
 	}
 
 	async subscribe(subscriber: QueueSubscriber): Promise<void> {
@@ -32,13 +46,19 @@ export class RabbitMQAdapter implements Queue {
 		});
 	}
 
-	async publish(queueName: string, data: any): Promise<void> {
+	async publish(event: Event): Promise<void> {
 		if (this.connection === undefined) throw new Error("");
 
-		this.logger.logEvent(queueName, `Message: ${JSON.stringify(data)}`);
+		this.logger.logEvent(
+			event.queueName,
+			`Message: ${JSON.stringify(event.message)}`
+		);
 
 		const channel = await this.connection.createChannel();
-		await channel.assertQueue(queueName, { durable: true });
-		channel.sendToQueue(queueName, Buffer.from(JSON.stringify(data)));
+		await channel.assertQueue(event.queueName, { durable: true });
+		channel.sendToQueue(
+			event.queueName,
+			Buffer.from(JSON.stringify(event.message))
+		);
 	}
 }

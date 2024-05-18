@@ -36,7 +36,7 @@ export class StockBook implements StockBookPort {
 		await this.bookFileStorage.storeCover(book.cover);
 		await this.bookRepository.save(book);
 
-		this.queue.publish("bookStocked", new BookStocked(book.id, book.unitPrice));
+		this.queue.publish(new BookStocked(book.id, book.unitPrice));
 
 		return { bookId: book.id };
 	};

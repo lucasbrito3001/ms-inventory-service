@@ -1,7 +1,7 @@
 import { Book } from "../../domain/entities/Book";
-import { BookEntity } from "../../infra/repository/entity/BookEntity";
 
 export interface BookRepository {
+	getAllToAI(category: string): Promise<Book[]>;
 	save(book: Book | Book[]): Promise<void>;
 	update(id: string, book: Book): Promise<void>;
 	batchUpdate(book: Book[]): Promise<void>;

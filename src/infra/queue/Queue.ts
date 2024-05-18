@@ -1,7 +1,8 @@
-import { QueueSubscriber } from "./subscribers/QueueSubscriber";
+import { Event } from "@/domain/Base";
+import { QueueSubscriber } from "./subscriber/QueueSubscriber";
 
 export interface Queue {
 	connect(): Promise<void>;
 	subscribe(subscriber: QueueSubscriber): Promise<void>;
-	publish(queueName: string, data: any): Promise<void>;
+	publish(event: Event): Promise<void>;
 }

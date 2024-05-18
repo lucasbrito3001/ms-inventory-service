@@ -15,9 +15,11 @@ export class BookEntity {
 	release?: string;
 	@Column({ type: "varchar" })
 	cover?: string;
+	@Column({ type: "varchar" })
+	category?: string;
 	@Column({ type: "int" })
 	quantity?: number;
-	@Column({ type: "bool" })
+	@Column({ type: !!process.env.TESTING_E2E === true ? "varchar" : "bool" })
 	isVisible?: boolean;
 	@Column({ type: "decimal", precision: 6, scale: 2 })
 	unitPrice?: number;

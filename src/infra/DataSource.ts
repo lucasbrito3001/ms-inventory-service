@@ -5,11 +5,15 @@ import {
 	EntityTarget,
 	ObjectLiteral,
 } from "typeorm";
-import { BookEntity } from "./repository/entity/BookEntity";
+import { BookEntity } from "./repository/entity/Book.entity";
+import { GeneralLogger } from "./log/GeneralLogger";
+import { Logger } from "./log/Logger";
+import { join } from "path";
 
 type DataSourceErrorNames =
 	| "BAD_DATASOURCE_CONFIG"
-	| "DATASOURCE_CONNECTION_CLOSED";
+	| "DATASOURCE_CONNECTION_CLOSED"
+	| "UNDEFINED_CONNECTION";
 
 export const DATASOURCE_ERRORS: ErrorsData<DataSourceErrorNames> = {
 	BAD_DATASOURCE_CONFIG: {
@@ -20,9 +24,13 @@ export const DATASOURCE_ERRORS: ErrorsData<DataSourceErrorNames> = {
 		message: "Can't close the connection, it's already closed.",
 		httpCode: 0,
 	},
+	UNDEFINED_CONNECTION: {
+		message: "Can't handle the database, the connection is not established.",
+		httpCode: 0,
+	},
 };
 
-export class DataSourceError extends ErrorBase<DataSourceErrorNames> {
+export class DataSourceError extends ErrorBase {
 	constructor(errorName: DataSourceErrorNames) {
 		super(
 			errorName,
@@ -34,6 +42,7 @@ export class DataSourceError extends ErrorBase<DataSourceErrorNames> {
 
 export class DataSourceConnection {
 	private connection: DataSource | undefined;
+	private readonly logger: Logger = new GeneralLogger();
 
 	getConfig(): DataSourceOptions | undefined {
 		const options: DataSourceOptions = {
@@ -43,35 +52,51 @@ export class DataSourceConnection {
 			username: process.env.DS_USER || "",
 			password: process.env.DS_PASS || "",
 			database: process.env.DS_DATABASE || "",
-			entities: [BookEntity],
+			entities: [join(__dirname, "repository", "entity", "*.entity.ts")],
 			synchronize: process.env.NODE_ENV !== "prd",
 			// logging: process.env.NODE_ENV !== "prd",
 		};
 
-		if (Object.values(options).some((opt) => !opt)) return undefined;
+		const optionsTest: DataSourceOptions = {
+			type: "sqlite",
+			database: ":memory:",
+			dropSchema: true,
+			synchronize: true,
+			entities: [BookEntity],
+		};
 
-		return options;
+		const config = !!process.env.TESTING_E2E === true ? optionsTest : options;
+
+		if (Object.values(config).some((opt) => !opt)) return undefined;
+
+		return config;
 	}
 
 	async initialize(): Promise<void> {
-		const config = this.getConfig();
+		try {
+			this.logger.log("[DATASOURCE] - Connecting to database...");
+			const config = this.getConfig();
 
-		if (config === undefined)
-			throw new DataSourceError("BAD_DATASOURCE_CONFIG");
+			if (config === undefined)
+				throw new DataSourceError("BAD_DATASOURCE_CONFIG");
 
-		this.connection = await new DataSource(config).initialize();
+			this.connection = await new DataSource(config).initialize();
+			this.logger.log("[DATASOURCE] - Connected succesfully!");
+		} catch (error) {
+			const anyError = error as any;
+			throw new Error(anyError.message);
+		}
 	}
 
 	getRepository(entity: EntityTarget<ObjectLiteral>) {
 		if (this.connection === undefined)
-			throw new DataSourceError("DATASOURCE_CONNECTION_CLOSED");
+			throw new DataSourceError("UNDEFINED_CONNECTION");
 
 		return this.connection.getRepository(entity);
 	}
 
 	async close(): Promise<void> {
-		if (this.connection === undefined)
-			throw new DataSourceError("DATASOURCE_CONNECTION_CLOSED");
+		if (this.connection === undefined) return;
 
 		await this.connection?.destroy();
 	}

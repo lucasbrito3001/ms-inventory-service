@@ -19,6 +19,7 @@ export class BookRouter {
 			this.bookController.stock
 		);
 		this.router.get("/search_books", this.bookController.search);
-		this.router.put("/update_price/:id", this.bookController.updateBookPrice)
+		this.router.put("/update_price/:id", this.bookController.updateBookPrice);
+		this.router.get("/get_book_informations/:id", this.bookController.getBookInformations);
 	}
 }
