@@ -47,27 +47,13 @@ export class DataSourceConnection {
 	getConfig(): DataSourceOptions | undefined {
 		const options: DataSourceOptions = {
 			type: "mysql",
-			port: 3306,
-			host: process.env.DS_HOST || "",
-			username: process.env.DS_USER || "",
-			password: process.env.DS_PASS || "",
-			database: process.env.DS_DATABASE || "",
-			entities: [join(__dirname, "repository", "entity", "*.entity.ts")],
+			url: process.env.DB_CONNECTION_STRING || "",
+			entities: [join(__dirname, "..", "repository", "entity", "*.entity.ts")],
 			synchronize: process.env.NODE_ENV !== "prd",
-			// logging: process.env.NODE_ENV !== "prd",
+			logging: process.env.NODE_ENV !== "prd",
 		};
 
-		const optionsTest: DataSourceOptions = {
-			type: "sqlite",
-			database: ":memory:",
-			dropSchema: true,
-			synchronize: true,
-			entities: [BookEntity],
-		};
-
-		const config = !!process.env.TESTING_E2E === true ? optionsTest : options;
-
-		if (Object.values(config).some((opt) => !opt)) return undefined;
+		const config = options;
 
 		return config;
 	}
