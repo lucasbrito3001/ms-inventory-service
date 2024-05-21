@@ -10,17 +10,10 @@ export class RabbitMQAdapter implements Queue {
 	constructor(private readonly logger: Logger) {}
 
 	async connect(): Promise<void> {
-		const connectionStringsByEnv = {
-			e2e: process.env.AMQP_E2E_CONNECTION_STRING as string,
-			dev: process.env.AMQP_DEV_CONNECTION_STRING as string,
-		};
-
 		try {
 			this.logger.log("[RABBITMQ] Connecting to RabbitMQ...");
 			this.connection = await amqp.connect(
-				connectionStringsByEnv[
-					process.env.NODE_ENV as keyof typeof connectionStringsByEnv
-				]
+				process.env.RABBITMQ_CONNECTION_STRING as string
 			);
 			this.logger.log("[RABBITMQ] Connected succesfully!");
 		} catch (error) {
