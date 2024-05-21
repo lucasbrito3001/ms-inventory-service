@@ -17,6 +17,7 @@ export class RabbitMQAdapter implements Queue {
 			);
 			this.logger.log("[RABBITMQ] Connected succesfully!");
 		} catch (error) {
+			console.log(error);
 			const anyError = error as any;
 			throw new Error(anyError.message);
 		}
