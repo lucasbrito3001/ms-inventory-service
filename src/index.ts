@@ -2,12 +2,12 @@ import "reflect-metadata";
 import "module-alias/register";
 
 import { config } from "dotenv";
-import { DataSourceConnection } from "./infra/DataSource";
+import { DataSourceConnection } from "./infra/data/DataSource";
 import { WebServer } from "./infra/Server";
 import { RabbitMQAdapter } from "./infra/queue/RabbitMQAdapter";
 import { GeneralLogger } from "./infra/log/GeneralLogger";
 import { FileStorage } from "./infra/FileStorage";
-import { BookCoverCloudFileStorage } from "./infra/repository/BookCloudFileStorage";
+import { BookCoverCloudFileStorage } from "./infra/data/repository/BookCloudFileStorage";
 
 config();
 

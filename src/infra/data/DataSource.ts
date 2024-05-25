@@ -6,8 +6,8 @@ import {
 	ObjectLiteral,
 } from "typeorm";
 import { BookEntity } from "./repository/entity/Book.entity";
-import { GeneralLogger } from "./log/GeneralLogger";
-import { Logger } from "./log/Logger";
+import { GeneralLogger } from "../log/GeneralLogger";
+import { Logger } from "../log/Logger";
 import { join } from "path";
 
 type DataSourceErrorNames =
@@ -48,7 +48,9 @@ export class DataSourceConnection {
 		const options: DataSourceOptions = {
 			type: "mysql",
 			url: process.env.DB_CONNECTION_STRING || "",
-			entities: [join(__dirname, "..", "repository", "entity", "*.entity.ts")],
+			entities: [join(__dirname, "repository", "entity", "*.entity{.ts,.js}")],
+			migrations: [join(__dirname, "migration", "*{.ts,.js}")],
+			migrationsRun: true,
 			synchronize: process.env.NODE_ENV !== "prd",
 			logging: process.env.NODE_ENV !== "prd",
 		};

@@ -1,11 +1,9 @@
 import express, { Express, NextFunction, Request, Response } from "express";
-import { DataSourceConnection } from "./DataSource";
+import { DataSourceConnection } from "./data/DataSource";
 import { Server } from "http";
 import { CONFIG_ROUTERS } from "./router";
 import { ErrorsData, ErrorBase } from "@/error/ErrorBase";
 import { DependencyRegistry } from "./DependencyRegistry";
-import { BookRepositoryDatabase } from "./repository/BookDatabaseRepository";
-import { BookEntity } from "./repository/entity/Book.entity";
 import { StockBook } from "@/application/usecase/StockBook";
 import { QueueController } from "./queue/QueueController";
 import cors from "cors";
@@ -23,6 +21,8 @@ import {
 import { BookFileStoragePort } from "@/application/repository/BookFileStorage";
 import { GetBookInformations } from "@/application/usecase/GetBookInformations";
 import { OpenAIAdapter } from "./generativeai/OpenAIAdapter";
+import { BookEntity } from "./data/repository/entity/Book.entity";
+import { BookRepositoryDatabase } from "./data/repository/BookDatabaseRepository";
 
 type WebServerErrorNames = "WEB_SERVER_CLOSED";
 
