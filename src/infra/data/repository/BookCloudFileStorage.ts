@@ -1,6 +1,8 @@
-import { BookFileStoragePort } from "../../application/repository/BookFileStorage";
-import { DependencyRegistry } from "../DependencyRegistry";
-import { FileStorageBucket, FileStorageBucketOptions } from "../FileStorage";
+import { BookFileStoragePort } from "@/application/repository/BookFileStorage";
+import {
+	FileStorageBucket,
+	FileStorageBucketOptions,
+} from "@/infra/FileStorage";
 
 export class BookCoverCloudFileStorage implements BookFileStoragePort {
 	private readonly bookCoverBucket: FileStorageBucket;

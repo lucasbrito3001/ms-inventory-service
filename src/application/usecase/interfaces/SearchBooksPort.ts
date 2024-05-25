@@ -1,5 +1,4 @@
-import { BookError } from "../../../error/BookError";
-import { Book } from "../../../domain/entities/Book";
+import { Book } from "@/domain/entities/Book";
 
 export interface SearchBooksPort {
 	execute(title: string): Promise<SearchBooksOutput>;

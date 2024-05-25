@@ -1,11 +1,11 @@
 import { beforeAll, beforeEach, describe, expect, test } from "vitest";
 import { StockBook } from "../../application/usecase/StockBook";
 import { SearchBooks } from "../../application/usecase/SearchBooks";
-import { BookMemoryRepository } from "../../infra/repository/mock/BookMemoryRepository";
+import { BookMemoryRepository } from "../../infra/data/repository/mock/BookMemoryRepository";
 import { Book } from "../../domain/entities/Book";
 import { INPUT_BOOK } from "../constants";
 import { DuplicatedBookError } from "../../error/BookError";
-import { BookLocalFileStorage } from "../../infra/repository/mock/BookLocalFileStorage";
+import { BookLocalFileStorage } from "../../infra/data/repository/mock/BookLocalFileStorage";
 import { DependencyRegistry } from "@/infra/DependencyRegistry";
 import { MockQueue } from "@/infra/queue/mock/MockQueue";
 import { BookRepository } from "@/application/repository/BookRepository";

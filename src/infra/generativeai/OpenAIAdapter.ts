@@ -1,7 +1,7 @@
 import { Book } from "@/domain/entities/Book";
 import OpenAI from "openai";
 import { GenerativeAIServicePort } from "./GenerativeAIService";
-import { INPUT_BOOK } from "@/test/constants";
+import { INPUT_BOOK } from "test/constants";
 import { BookRepository } from "@/application/repository/BookRepository";
 import { DependencyRegistry } from "../DependencyRegistry";
 import { StockBookDTO } from "@/application/controller/dto/StockBookDto";

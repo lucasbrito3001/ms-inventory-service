@@ -1,0 +1,14 @@
+name: pipeline_cd
+run-name: Pipeline CD - v1.0
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  run-unit-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout env
+        uses: actions/checkout@v4

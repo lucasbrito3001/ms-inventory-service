@@ -7,7 +7,7 @@ import {
 import { BookNotFoundError } from "@/error/BookError";
 import { DependencyRegistry } from "@/infra/DependencyRegistry";
 import { MockGenerativeAIService } from "@/infra/generativeai/mock/MockGenerativeAIService";
-import { BookMemoryRepository } from "@/infra/repository/mock/BookMemoryRepository";
+import { BookMemoryRepository } from "@/infra/data/repository/mock/BookMemoryRepository";
 import { beforeAll, beforeEach, describe, expect, test } from "vitest";
 import { INPUT_BOOK } from "../constants";
 import { Book } from "@/domain/entities/Book";
