@@ -45,7 +45,7 @@ export class CheckOrderItems implements CheckOrderItemsPort {
 				book.title,
 				book.edition,
 				book.author,
-				book.release,
+				book.releaseDate,
 				book.cover,
 				book.category,
 				decreasedQuantity,

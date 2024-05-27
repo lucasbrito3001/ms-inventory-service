@@ -27,7 +27,7 @@
 // 			.field("title", "Domain-Driven Design")
 // 			.field("edition", "18")
 // 			.field("author", "Eric Evans")
-// 			.field("release", "2003-08-22T03:00:00.000Z")
+// 			.field("releaseDate", "2003-08-22T03:00:00.000Z")
 // 			.field("quantity", "15")
 // 			.field("isVisible", "true")
 // 			.field("unitPrice", "50");

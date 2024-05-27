@@ -55,6 +55,8 @@ export class DataSourceConnection {
 			logging: process.env.NODE_ENV !== "prd",
 		};
 
+		console.log(join(__dirname, "migration", "*{.ts,.js}"))
+
 		const config = options;
 
 		return config;

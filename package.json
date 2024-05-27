@@ -4,11 +4,11 @@
 	"description": "",
 	"main": "index.js",
 	"scripts": {
-		"test": "vitest src/test/unit/*.test.ts",
-		"test:e2e": "export NODE_ENV=development && export TESTING_E2E=e2e && vitest src/test/e2e/*.test.ts",
+		"test": "vitest test/unit/*.test.ts",
+		"test:e2e": "export NODE_ENV=development && export TESTING_E2E=e2e && vitest test/e2e/*.test.ts",
 		"start:dev": "export NODE_ENV=dev && tsx watch src/index.ts",
-		"start": "export NODE_ENV=prd && node dist/index.js",
-		"build": "tsup src/index.ts",
+		"start": "export NODE_ENV=prd && node src/index.js",
+		"build": "tsc -p tsconfig.build.json",
 		"typeorm": "ts-node-dev -r tsconfig-paths/register ./node_modules/typeorm/cli.js"
 	},
 	"keywords": [],
