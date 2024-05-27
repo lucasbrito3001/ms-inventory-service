@@ -13,7 +13,7 @@ export class CreateBook1716642859598 implements MigrationInterface {
         category varchar(255) NOT NULL,
         quantity int DEFAULT 0,
         isVisible boolean NOT NULL,
-        unit_price decimal(6, 2) NOT NULL,
+        unitPrice decimal(6, 2) NOT NULL,
         UNIQUE (title, edition)
       );
     `);
