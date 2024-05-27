@@ -9,7 +9,7 @@
 		"start:dev": "export NODE_ENV=dev && tsx watch src/index.ts",
 		"start": "export NODE_ENV=prd && node src/index.js",
 		"build": "tsc -p tsconfig.build.json",
-		"typeorm": "ts-node-dev -r tsconfig-paths/register ./node_modules/typeorm/cli.js"
+		"typeorm": "typeorm"
 	},
 	"keywords": [],
 	"author": "",
