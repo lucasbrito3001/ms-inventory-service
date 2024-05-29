@@ -23,7 +23,7 @@ export class UpdatePrice implements UpdatePricePort {
 		const bookUpdated = Book.updatePrice(book, unitPrice);
 
 		await this.bookRepository.update(id, bookUpdated);
-		this.queue.publish("priceUpdated", new PriceUpdated(id, unitPrice));
+		this.queue.publish(new PriceUpdated(id, unitPrice));
 
 		return;
 	}

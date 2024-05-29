@@ -12,9 +12,11 @@ export class BookEntity {
 	@Column({ type: "varchar" })
 	author?: string;
 	@Column({ type: "varchar" })
-	release?: string;
+	releaseDate?: string;
 	@Column({ type: "varchar" })
 	cover?: string;
+	@Column({ type: "varchar" })
+	category?: string;
 	@Column({ type: "int" })
 	quantity?: number;
 	@Column({ type: "bool" })

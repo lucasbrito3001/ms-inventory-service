@@ -1,6 +1,6 @@
 import { BookRepository } from "@/application/repository/BookRepository";
-import { StockBookDTO } from "../../../application/controller/dto/StockBookDto";
-import { Book } from "../../../domain/entities/Book";
+import { StockBookDTO } from "@/application/controller/dto/StockBookDto";
+import { Book } from "@/domain/entities/Book";
 
 export class BookMemoryRepository implements BookRepository {
 	private books: Book[] = [];
@@ -38,10 +38,14 @@ export class BookMemoryRepository implements BookRepository {
 	}
 
 	async search(title: string): Promise<Book[]> {
-		return this.books.filter((stock) => stock.title === title);
+		return this.books.filter((book) => book.title === title);
 	}
 
 	async searchByIds(ids: string[]): Promise<Book[]> {
-		return this.books.filter((stock) => ids.includes(stock.id));
+		return this.books.filter((book) => ids.includes(book.id));
+	}
+
+	async getAllToAI(category: string): Promise<Book[]> {
+		return this.books.filter((book) => book.category === category);
 	}
 }

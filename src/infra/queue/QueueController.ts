@@ -1,6 +1,6 @@
 import { Queue } from "./Queue";
 import { DependencyRegistry } from "../DependencyRegistry";
-import { QueueSubscriber } from "./subscribers/QueueSubscriber";
+import { QueueSubscriber } from "./subscriber/QueueSubscriber";
 
 export class QueueController {
 	private readonly queue: Queue;

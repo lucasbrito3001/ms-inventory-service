@@ -1,4 +1,4 @@
-import { OrderRegistered } from "@/domain/event/OrderRegistered";
+import { OrderRegisteredMessage } from "@/domain/event/OrderRegistered";
 import { CheckOrderItemsPort } from "./interfaces/CheckOrderItemsPort";
 import { DependencyRegistry } from "@/infra/DependencyRegistry";
 import { BookRepository } from "../repository/BookRepository";
@@ -16,15 +16,12 @@ export class CheckOrderItems implements CheckOrderItemsPort {
 		this.queue = registry.inject("queue");
 	}
 
-	async execute(order: OrderRegistered): Promise<void> {
+	async execute(order: OrderRegisteredMessage): Promise<void> {
 		const bookIds = order.items.map((book) => book.itemId);
 		const books = await this.bookRepository.searchByIds(bookIds);
 
 		if (bookIds.length > books.length)
-			return this.queue.publish(
-				"orderItemsRejected",
-				new OrderItemsRejected(order.id)
-			);
+			return this.queue.publish(new OrderItemsRejected(order.orderId));
 
 		const isBooksAvailable = books.every((book) => {
 			const orderItem = order.items.find((item) => item.itemId === book.id);
@@ -36,31 +33,31 @@ export class CheckOrderItems implements CheckOrderItemsPort {
 		});
 
 		if (!isBooksAvailable)
-			return this.queue.publish(
-				"orderItemsRejected",
-				new OrderItemsRejected(order.id)
-			);
+			return this.queue.publish(new OrderItemsRejected(order.orderId));
 
 		const updatedBooks = books.map((book) => {
 			const orderItem = order.items.find((item) => item.itemId === book.id);
 
 			const decreasedQuantity = book.quantity - (orderItem?.quantity as number);
 
-			return new Book(
+			return Book.instance(
 				book.id,
 				book.title,
 				book.edition,
 				book.author,
-				book.release,
+				book.releaseDate,
 				book.cover,
+				book.category,
 				decreasedQuantity,
 				book.isVisible,
 				book.unitPrice
 			);
 		});
 
-		this.bookRepository.batchUpdate(updatedBooks);
+		await this.bookRepository.batchUpdate(updatedBooks);
 
-		this.queue.publish("orderItemsApproved", new OrderItemsApproved(order.id));
+		await this.queue.publish(
+			new OrderItemsApproved(order.orderId, order.accountId, order.value)
+		);
 	}
 }

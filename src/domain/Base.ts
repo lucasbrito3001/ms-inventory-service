@@ -3,3 +3,8 @@ export class DomainBase {
 		return +value.toFixed(2);
 	}
 }
+
+export interface Event {
+	queueName: string;
+	message: any;
+}

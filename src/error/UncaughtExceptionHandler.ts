@@ -12,21 +12,14 @@ export class UncaughtExceptionHandler {
 	}
 
 	handle = (error: any) => {
-		if (error instanceof ErrorBase) {
-			this.logger.handledError(error.name, error.message);
+		if (!(error instanceof ErrorBase)) throw error;
 
-			const { httpCode, cause, ...errorBase } = error;
-			return this.response.status(httpCode).json({
-				...errorBase,
-				...(process.env.NODE_ENV !== "production" && { cause }),
-			});
-		}
+		this.logger.handledError(error.name, error.message);
 
-		this.logger.handledError("UNHANDLED_ERROR", error);
-		return this.response
-			.status(500)
-			.json({
-				error: "Internal server error, please contact the administrator",
-			});
+		const { httpCode, cause, ...errorBase } = error;
+		this.response.status(httpCode).json({
+			...errorBase,
+			...(process.env.NODE_ENV !== "production" && { cause }),
+		});
 	};
 }
