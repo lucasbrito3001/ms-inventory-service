@@ -3,7 +3,7 @@ import { MigrationInterface, QueryRunner } from "typeorm";
 export class CreateBook1716642859598 implements MigrationInterface {
 	public async up(queryRunner: QueryRunner): Promise<void> {
 		await queryRunner.query(`
-      CREATE TABLE book (
+      CREATE TABLE IF NOT EXISTS book (
         id char(36) PRIMARY KEY,
         title varchar(255) NOT NULL,
         edition int NOT NULL,
@@ -13,7 +13,7 @@ export class CreateBook1716642859598 implements MigrationInterface {
         category varchar(255) NOT NULL,
         quantity int DEFAULT 0,
         isVisible boolean NOT NULL,
-        unitPrice decimal(6, 2) NOT NULL,
+        unit_price decimal(6, 2) NOT NULL,
         UNIQUE (title, edition)
       );
     `);
